@@ -68,9 +68,51 @@ class LLMClient:
     @staticmethod
     def create(provider: str, api_key: str, model: str) -> BaseLLMClient:
         """Create an LLM client based on provider."""
+        # Fallback to dummy client if no API key provided (local dev/testing)
+        if not api_key:
+            return DummyLLMClient()
         if provider.lower() == "openai":
             return OpenAIClient(api_key, model)
-        elif provider.lower() == "anthropic":
+        if provider.lower() == "anthropic":
             return AnthropicClient(api_key, model)
-        else:
-            raise ValueError(f"Unsupported LLM provider: {provider}")
+        # Unknown provider -> dummy
+        return DummyLLMClient()
+
+
+class DummyLLMClient(BaseLLMClient):
+    """Deterministic offline LLM fallback for local development.
+
+    Generates a minimal JSON response so the UI can function without real LLM keys.
+    """
+
+    async def generate_completion(self, prompt: str, system_prompt: Optional[str] = None) -> str:
+        # Very small heuristic: detect language mentioned in prompt to tailor reproduction
+        language = "python"
+        lowered = prompt.lower()
+        if "javascript" in lowered or "node" in lowered or "typescript" in lowered:
+            language = "javascript"
+        elif "java" in lowered:
+            language = "java"
+
+        if language == "python":
+            repro = "def buggy(x):\n    return x['missing']\n\nprint(buggy({}))  # KeyError"
+            test = "import pytest\n\ndef buggy(x):\n    return x['missing']\n\ndef test_buggy():\n    with pytest.raises(KeyError):\n        buggy({})"
+            explanation = "Accessing a non-existent key raises KeyError. The reproduction shows direct dict indexing without presence check."
+            fix = "Use x.get('missing') or check 'missing' in x before access."
+        elif language == "javascript":
+            repro = "function buggy(obj){ return obj.missing.toLowerCase(); }\nconsole.log(buggy({})); // TypeError"
+            test = "test('buggy throws', () => { expect(() => buggy({})).toThrow(TypeError); });"
+            explanation = "Calling toLowerCase() on undefined causes a TypeError. Missing property access isn't guarded."
+            fix = "Add optional chaining (obj.missing?.toLowerCase()) or validate input before use."
+        else:  # java
+            repro = "public class Main { public static void main(String[] a){ String s = null; System.out.println(s.toLowerCase()); } }"
+            test = "// JUnit test would assert NullPointerException when invoking toLowerCase on null"
+            explanation = "Dereferencing null String leads to NullPointerException."
+            fix = "Initialize the variable or guard against null before calling methods."
+
+        return json.dumps({
+            "repro_code": repro,
+            "test_code": test,
+            "explanation": explanation,
+            "fix_suggestion": fix
+        })

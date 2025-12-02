@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Bug } from "lucide-react";
+import LoginWithGitHub from "@/components/LoginWithGitHub";
 
 export default function Navbar() {
   return (
@@ -24,6 +25,19 @@ export default function Navbar() {
             >
               Sessions
             </Link>
+            <Link
+              href="/teams"
+              className="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            >
+              Teams
+            </Link>
+            <Link
+              href="/sandbox"
+              className="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+            >
+              Sandbox
+            </Link>
+            <LoginWithGitHub />
           </div>
         </div>
       </div>

@@ -3,7 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.api.routes_debug import router as debug_router
+from app.api.routes_runs import router as runs_router
 from app.db.session import engine, Base
+# Ensure models are imported before create_all
+from app.models import run as _run_model  # noqa: F401
+from app.models import user as _user_model  # noqa: F401
+from app.models import team as _team_model  # noqa: F401
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -24,7 +29,15 @@ app.add_middleware(
 )
 
 # Include routers
+from app.api.routes_auth import router as auth_router
+from app.api.routes_teams import router as teams_router
+from app.api.routes_sandbox import router as sandbox_router
+
 app.include_router(debug_router)
+app.include_router(runs_router)
+app.include_router(auth_router)
+app.include_router(teams_router)
+app.include_router(sandbox_router)
 
 
 @app.get("/")

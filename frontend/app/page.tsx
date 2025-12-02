@@ -69,6 +69,20 @@ export default function Home() {
                 setIsLoading={setIsLoading}
               />
             </div>
+            <div className="flex gap-4 items-center">
+              <a
+                href="/sandbox"
+                className="border px-4 py-2 rounded hover:bg-gray-100"
+              >
+                Try Sandbox
+              </a>
+              <a
+                href={`http://localhost:8000/api/auth/github/login`}
+                className="border px-4 py-2 rounded hover:bg-gray-100"
+              >
+                Login with GitHub
+              </a>
+            </div>
           </>
         ) : (
           <SessionResult session={result} onNewSession={handleNewSession} />

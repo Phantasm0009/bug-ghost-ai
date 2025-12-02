@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # Docker-in-Docker for sandbox execution
+  dind:
+    image: docker:27-dind
+    container_name: bug-ghost-dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+      DOCKER_HOST: tcp://0.0.0.0:2375
+    ports:
+      - "2375:2375"
+    volumes:
+      - dind-storage:/var/lib/docker
+    command: ["dockerd", "--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock", "--tls=false"]
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
@@ -26,17 +46,20 @@ services:
       dockerfile: Dockerfile
     container_name: bug-ghost-backend
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/bug_ghost_ai
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/bug_ghost_ai
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
       LLM_API_KEY: ${LLM_API_KEY}
       LLM_MODEL: ${LLM_MODEL:-gpt-4-turbo-preview}
       API_HOST: 0.0.0.0
       API_PORT: 8000
       CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+      DOCKER_HOST: tcp://dind:2375
     ports:
       - "8000:8000"
     depends_on:
       db:
+        condition: service_healthy
+      dind:
         condition: service_healthy
     volumes:
       - ./backend:/app
@@ -60,5 +83,31 @@ services:
       - /app/.next
     command: npm run dev
 
+  # Sandbox images (build once, used by backend via DinD)
+  sandbox-python:
+    build:
+      context: ./sandbox/python
+      dockerfile: Dockerfile
+    image: bug-ghost-sandbox-python:latest
+    command: ["echo", "Sandbox image built"]
+    profiles: ["build-only"]
+
+  sandbox-node:
+    build:
+      context: ./sandbox/node
+      dockerfile: Dockerfile
+    image: bug-ghost-sandbox-node:latest
+    command: ["echo", "Sandbox image built"]
+    profiles: ["build-only"]
+
+  sandbox-java:
+    build:
+      context: ./sandbox/java
+      dockerfile: Dockerfile
+    image: bug-ghost-sandbox-java:latest
+    command: ["echo", "Sandbox image built"]
+    profiles: ["build-only"]
+
 volumes:
   postgres_data:
+  dind-storage:

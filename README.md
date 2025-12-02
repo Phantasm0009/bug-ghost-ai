@@ -37,7 +37,14 @@ Perfect for developers who want to:
 - **Session history**: View and revisit past debugging sessions
 - **Beautiful UI**: Modern, responsive interface built with Next.js and Tailwind CSS
 
-### Planned Features (Phase 2)
+### Phase 2 Features (Now Available!) 🎉
+- **Sandbox execution**: Run code in isolated Docker containers with strict security
+- **Real-time log streaming**: Watch code execution via WebSocket
+- **Multi-language runtime**: Python, Node.js, Java support out of the box
+- **Security hardened**: Non-root execution, no network, resource limits
+- **Docker-in-Docker**: Easy deployment with full stack in Compose
+
+### Planned Features (Phase 3)
 - **Sandbox execution**: Run reproductions in isolated Docker containers
 - **Live debugging**: Step through reproduction code
 - **Team collaboration**: Share sessions with teammates
@@ -86,6 +93,7 @@ bug-ghost-ai/
 
 **Infrastructure:**
 - Docker & Docker Compose
+- Docker-in-Docker (DinD) for safe code execution
 - PostgreSQL 15
 - Nginx (optional)
 
@@ -118,12 +126,25 @@ bug-ghost-ai/
    cp frontend/.env.example frontend/.env.local
    ```
 
-3. **Start all services**
+3. **Build sandbox images** (first time only)
+   ```bash
+   # Linux/Mac
+   chmod +x setup-sandbox.sh
+   ./setup-sandbox.sh
+   
+   # Windows
+   setup-sandbox.bat
+   
+   # Or manually
+   docker-compose build sandbox-python sandbox-node sandbox-java
+   ```
+
+4. **Start all services**
    ```bash
    docker-compose up -d
    ```
 
-4. **Access the application**
+5. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Docs: http://localhost:8000/docs
@@ -366,6 +387,55 @@ GET /api/debug-sessions/{session_id}
 GET /api/debug-sessions?skip=0&limit=20
 ```
 
+#### Execute Code in Sandbox (Phase 2)
+```http
+POST /api/runs
+Content-Type: application/json
+
+{
+  "language": "python",
+  "code": "print('Hello from sandbox!')\nfor i in range(5):\n    print(f'Count: {i}')",
+  "timeout_sec": 10
+}
+```
+
+Response:
+```json
+{
+  "run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "language": "python",
+  "status": "completed",
+  "stdout": "Hello from sandbox!\nCount: 0\nCount: 1\nCount: 2\nCount: 3\nCount: 4\n",
+  "image": "bug-ghost-sandbox-python:latest",
+  "created_at": "2025-12-01T10:30:00Z"
+}
+```
+
+#### Stream Run Logs (WebSocket)
+```javascript
+const ws = new WebSocket('ws://localhost:8000/api/runs/ws/{run_id}/logs');
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(data.type, data.data); // stdout, stderr, or complete
+};
+```
+
+---
+
+## 🔒 Sandbox Security
+
+The sandbox execution system implements multiple security layers:
+
+- **Isolation**: Each run in a fresh, isolated container
+- **Non-root**: Code runs as user `1000:1000` (not root)
+- **No network**: `network_disabled=True` by default
+- **Resource limits**: 256MB RAM, ~50% CPU quota
+- **Time limits**: 10-60 second execution timeout
+- **No persistence**: Container destroyed after execution
+- **Code injection**: No host mounts; code via in-memory tar
+
+Supported languages: Python, Node.js (JavaScript/TypeScript), Java
+
 ---
 
 ## 🎯 Roadmap
@@ -377,14 +447,15 @@ GET /api/debug-sessions?skip=0&limit=20
 - [x] Multi-language support
 - [x] Beautiful UI
 
-### Phase 2 (Q2 2024)
-- [ ] Docker sandbox execution
-- [ ] Live log capture
-- [ ] Screenshot/video recording
+### Phase 2 (Current) ✅
+- [x] Docker sandbox execution
+- [x] Real-time log streaming (WebSocket)
+- [x] Security-hardened containers
+- [x] Multi-language runtime support
 - [ ] Team collaboration
 - [ ] GitHub integration
 
-### Phase 3 (Q3 2024)
+### Phase 3 (Q3 2025)
 - [ ] Custom LLM model support
 - [ ] Advanced analytics
 - [ ] Browser extension
