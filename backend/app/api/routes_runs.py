@@ -44,10 +44,11 @@ async def create_run(run_data: RunCreate, db: Session = Depends(get_db)):
         run_response = RunResponse(
             run_id=result["run_id"],
             language=run_data.language,
-            status="completed",
+            status=result.get("status", "completed"),
             stdout=result.get("stdout", ""),
             stderr=result.get("stderr", ""),
             exit_code=result.get("exit_code", 0),
+            execution_time_ms=result.get("execution_time_ms"),
             image=result.get("image"),
             created_at=datetime.utcnow(),
             completed_at=datetime.utcnow()
@@ -80,7 +81,7 @@ async def create_run(run_data: RunCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{run_id}", response_model=RunResponse)
-def get_run(run_id: str, db: Session = Depends(get_db)):
+async def get_run(run_id: str, db: Session = Depends(get_db)):
     """Get the status and output of a specific run."""
     # Prefer DB record; fallback to in-memory if present
     db_run = db.query(RunModel).filter(RunModel.id == run_id).first()

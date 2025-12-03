@@ -13,16 +13,16 @@ class Settings(BaseSettings):
     
     # LLM
     LLM_PROVIDER: str = "openai"  # openai or anthropic
-    LLM_API_KEY: str
+    LLM_API_KEY: str = ""  # provide via .env
     LLM_MODEL: str = "gpt-4-turbo-preview"
     
     # OAuth - GitHub
-    GITHUB_CLIENT_ID: str = "Ov23li1EIr7THAoPMIZk"
-    GITHUB_CLIENT_SECRET: str = "80ad95e8234de5dd269444b5b4f1891c39b23f34"
+    GITHUB_CLIENT_ID: str = ""  # provide via .env
+    GITHUB_CLIENT_SECRET: str = ""  # provide via .env
     GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/auth/github/callback"
     
     # Auth/JWT (future use)
-    JWT_SECRET: str = "07b28276182c084de6b3d810b4cef400"
+    JWT_SECRET: str = "change-me-in-env"
     JWT_ALGORITHM: str = "HS256"
     
     # API

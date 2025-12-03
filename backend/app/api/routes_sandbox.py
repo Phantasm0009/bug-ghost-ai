@@ -4,6 +4,7 @@ from app.config import settings
 import io
 import tarfile
 import docker
+import asyncio
 
 
 router = APIRouter(prefix="/api/sandbox", tags=["sandbox"])
@@ -84,20 +85,24 @@ def _build_image_from_dockerfile(client: docker.DockerClient, dockerfile_text: s
 
 
 @router.get("/images")
-def list_sandbox_images() -> Dict[str, Any]:
-    client = _docker_client()
-    present: Dict[str, bool] = {}
-    for lang, tag in IMAGES.items():
-        try:
-            imgs = client.images.list(name=tag)
-            present[tag] = any(tag in (img.tags or []) for img in imgs)
-        except Exception:
-            present[tag] = False
+async def list_sandbox_images() -> Dict[str, Any]:
+    def _work():
+        client = _docker_client()
+        present: Dict[str, bool] = {}
+        for lang, tag in IMAGES.items():
+            try:
+                imgs = client.images.list(name=tag)
+                present[tag] = any(tag in (img.tags or []) for img in imgs)
+            except Exception:
+                present[tag] = False
+        return present
+
+    present = await asyncio.to_thread(_work)
     return {"images": present}
 
 
 @router.post("/images/build")
-def build_sandbox_images(languages: Optional[List[str]] = None) -> Dict[str, Any]:
+async def build_sandbox_images(languages: Optional[List[str]] = None) -> Dict[str, Any]:
     # Default to building canonical set
     langs = languages or ["python", "javascript", "java"]
     # De-duplicate/normalize
@@ -109,14 +114,17 @@ def build_sandbox_images(languages: Optional[List[str]] = None) -> Dict[str, Any
         if l not in norm:
             norm.append(l)
 
-    client = _docker_client()
-    results: Dict[str, Any] = {}
-    for l in norm:
-        if l not in DOCKERFILES:
-            results[l] = {"built": False, "error": "unsupported language"}
-            continue
-        tag = IMAGES.get(l, IMAGES["python"]) if l != "node" else IMAGES["node"]
-        logs = _build_image_from_dockerfile(client, DOCKERFILES[l], tag)
-        results[l] = {"built": True, "image": tag, "logs": logs[-20:]}  # return tail of logs
+    def _build_all() -> Dict[str, Any]:
+        client = _docker_client()
+        out: Dict[str, Any] = {}
+        for l in norm:
+            if l not in DOCKERFILES:
+                out[l] = {"built": False, "error": "unsupported language"}
+                continue
+            tag = IMAGES.get(l, IMAGES["python"]) if l != "node" else IMAGES["node"]
+            logs = _build_image_from_dockerfile(client, DOCKERFILES[l], tag)
+            out[l] = {"built": True, "image": tag, "logs": logs[-20:]}
+        return out
 
+    results = await asyncio.to_thread(_build_all)
     return {"results": results}

@@ -41,7 +41,7 @@ app.include_router(sandbox_router)
 
 
 @app.get("/")
-def root():
+async def root():
     """Root endpoint."""
     return {
         "name": "Bug Ghost AI",
@@ -51,6 +51,6 @@ def root():
 
 
 @app.get("/health")
-def health_check():
+async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}

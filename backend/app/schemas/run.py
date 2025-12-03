@@ -19,6 +19,7 @@ class RunResponse(BaseModel):
     stdout: Optional[str] = None
     stderr: Optional[str] = None
     exit_code: Optional[int] = None
+    execution_time_ms: Optional[int] = None
     error: Optional[str] = None
     image: Optional[str] = None
     created_at: datetime

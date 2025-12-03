@@ -69,6 +69,11 @@ export default function SessionDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950">
       <div className="container mx-auto px-4 py-12">
+        <div className="mb-6">
+          <Link href="/sessions" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+            ← Back to Sessions
+          </Link>
+        </div>
         <SessionResult session={session} onNewSession={() => {}} />
       </div>
     </div>

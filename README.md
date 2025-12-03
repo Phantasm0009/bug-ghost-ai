@@ -2,6 +2,9 @@
 
 **The AI Debug Replayer** - Transform error messages into reproducible bug scenarios with AI-powered analysis.
 
+[![CI](https://github.com/yourusername/bug-ghost-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/bug-ghost-ai/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-~80%25-brightgreen.svg)](#-running-tests)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
@@ -45,11 +48,20 @@ Perfect for developers who want to:
 - **Docker-in-Docker**: Easy deployment with full stack in Compose
 
 ### Planned Features (Phase 3)
-- **Sandbox execution**: Run reproductions in isolated Docker containers
 - **Live debugging**: Step through reproduction code
 - **Team collaboration**: Share sessions with teammates
 - **GitHub integration**: Create issues directly from sessions
 - **Custom LLM models**: Support for local/custom AI models
+
+---
+
+## 👀 Quick Look
+
+Here’s a quick peek at Bug Ghost AI in action:
+
+![Demo Screenshot](docs/images/demo.png)
+
+Tip: Replace `docs/images/demo.png` with your own GIF or screenshot for a richer preview.
 
 ---
 

@@ -90,7 +90,7 @@ bug-ghost-ai/
 │   │   ├── services/          # Business logic
 │   │   │   ├── llm_client.py      # LLM abstraction
 │   │   │   ├── repro_generator.py # AI logic
-│   │   │   └── sandbox_runner.py  # Phase 2 stub
+│   │   │   └── sandbox_runner.py  # Secure Docker sandbox runner
 │   │   ├── db/                # Database config
 │   │   └── main.py            # App entry point
 │   ├── tests/                 # Unit tests
@@ -236,12 +236,12 @@ npm run type-check        # Type checking
 - Beautiful, responsive UI
 - Copy-to-clipboard for all code blocks
 
-### Phase 2 Features (Stubbed) 🚧
-- Docker sandbox execution
-- Live code running
-- Log capture
+### Phase 2 Features ✅
+- Docker sandbox execution (secure, non-root, no network)
+- Live code running with log capture
+- WebSocket streaming (client-ready)
 
-The interface is ready - just implement the `SandboxRunner.run_in_sandbox()` method.
+Implemented in `backend/app/services/sandbox_runner.py` and `/api/runs` endpoints.
 
 ---
 

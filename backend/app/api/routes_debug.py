@@ -85,7 +85,7 @@ async def create_debug_session(
 
 
 @router.get("/{session_id}", response_model=DebugSessionResponse)
-def get_debug_session(session_id: UUID, db: Session = Depends(get_db)):
+async def get_debug_session(session_id: UUID, db: Session = Depends(get_db)):
     """Get a specific debug session by ID."""
     
     db_session = db.query(DebugSession).filter(DebugSession.id == session_id).first()
@@ -97,7 +97,7 @@ def get_debug_session(session_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=List[DebugSessionListResponse])
-def list_debug_sessions(
+async def list_debug_sessions(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db)

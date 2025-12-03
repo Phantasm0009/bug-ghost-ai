@@ -19,7 +19,7 @@
 - `app/api/routes_debug.py` - REST API endpoints
 - `app/services/llm_client.py` - Generic LLM client (OpenAI/Anthropic)
 - `app/services/repro_generator.py` - AI reproduction generation logic
-- `app/services/sandbox_runner.py` - Stubbed sandbox runner (Phase 2)
+- `app/services/sandbox_runner.py` - Secure Docker sandbox runner (implemented)
 - `tests/test_api.py` - API endpoint tests
 - `tests/test_repro_generator.py` - Service layer tests
 - `requirements.txt` - Python dependencies
@@ -258,15 +258,13 @@ npm run dev
 - ✅ Error handling
 - ✅ Logging
 
-## What's Stubbed for Phase 2
+## Phase 2 Enhancements (Implemented)
 
 **Sandbox Execution** (`backend/app/services/sandbox_runner.py`):
-- Docker container execution
-- Live code running
-- Log capture
-- Security isolation
-
-This is fully stubbed with the interface defined, ready for implementation.
+- Docker container execution with strict isolation (non-root, no network)
+- Live code running with stdout/stderr capture
+- WebSocket-friendly log streaming via `/api/runs/ws/{run_id}/logs`
+- Security hardening (cap_drop ALL, read-only rootfs, tmpfs workspace)
 
 ## File Count
 

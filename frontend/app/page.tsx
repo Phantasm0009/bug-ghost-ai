@@ -68,6 +68,17 @@ export default function Home() {
                 isLoading={isLoading}
                 setIsLoading={setIsLoading}
               />
+              <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium">Tip: Try a sample error</p>
+                </div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>
+                    Example (JavaScript): <code className="font-mono">TypeError: Cannot read properties of undefined (reading 'toLowerCase')</code>
+                  </p>
+                  <p className="opacity-80">You can paste this into the form above to see a full reproduction and test.</p>
+                </div>
+              </div>
             </div>
             <div className="flex gap-4 items-center">
               <a
